@@ -1,0 +1,54 @@
+.MODEL SMALL
+.DATA 
+.CODE
+MAIN PROC
+    
+    XOR BX,BX ; clear BX
+    MOV CL,4  ; counter for 4 shifts
+    MOV AH,1  ; input character function
+    INT 21H   ; input a character
+
+WHILE:
+    CMP AL,0DH   ; CR?
+    JE END_WHILE ; yes, exit
+
+    CMP AL, 39H  ; a dig?
+    JG LETTER    ;no, a letter
+    
+    AND AL, 0FH  ;convert the dig into binary value
+    JMP SHIFT    ;go to insert in BX
+    
+LETTER:                
+    SUB AL, 37H  ;convert a letter to binary
+
+SHIFT:
+    SHL BX,CL    ;make room fot new value
+    OR  BL,AL    ;put value into low 4 bits of bx
+    
+    INT 21H      ;input a char
+    JMP WHILE    ;loop until cr
+
+END_WHILE: 
+
+    MOV CX,16 
+    MOV AH,2
+TOP:
+    RCL BX,1
+    JNC NEXT1
+    
+    
+    MOV DL,'0'
+    INT 21H
+    
+    JMP PRINT    
+    
+NEXT1:
+    MOV DL,'1'
+    INT 21H
+    
+PRINT: 
+
+LOOP TOP
+
+    MAIN ENDP
+END MAIN
